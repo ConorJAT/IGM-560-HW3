@@ -1,5 +1,7 @@
 using UnityEngine;
+using System.Collections.Generic;
 using RPS;
+using NGram;
 
 /// <summary>
 /// This class receives input from the player, queries the AI for predictions, and updates the total wins/losses.
@@ -14,6 +16,11 @@ public class PlayerInterface : MonoBehaviour
 
     // Records the number of times the AI has won.
     private int aiWins = 0;
+
+    // Records all player's input.
+    private List<RPSMove> moves = new List<RPSMove>();
+
+    private NGramPredictor nGram = new NGramPredictor(3);
 
     // Update is called once per frame
     void Update()
@@ -40,11 +47,26 @@ public class PlayerInterface : MonoBehaviour
                 else if (hit.collider.gameObject.name == "Scissors") input = 's';
                 else return;
 
+                moves.Insert(0, RockPaperScissors.CharToMove(input));
+                if (moves.Count >= nGram.nValue)
+                {
+                    nGram.RegisterSequence(moves);
+                }
+
                 // Ask the ngram AI to predict what the player will choose..
                 // You will need to implement this code and any history tracking it requires.
                 // For now, we will predict a move at random.
-                char predicted = RockPaperScissors.RandomMove();
-                RPSMove predMove = RockPaperScissors.CharToMove(predicted);
+                RPSMove predMove;
+                if (moves.Count < nGram.nValue)
+                {
+                    char predicted = RockPaperScissors.RandomMove();
+                    predMove = RockPaperScissors.CharToMove(predicted);
+                }
+                else
+                {
+                    predMove = nGram.GetBestMove(moves);
+                }
+
                 output += "\nThe NGram AI predicts you will play: " + predMove;
 
                 // Given the predicted user move, choose the move that will win against it.
