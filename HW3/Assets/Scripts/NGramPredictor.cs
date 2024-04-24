@@ -8,30 +8,36 @@ namespace NGram
 {
     public class NGramPredictor
     {
-        public Dictionary<List<RPSMove>, KeyDataRecord> Data { get; private set; }
+        public Dictionary<string, KeyDataRecord> Data { get; private set; }
         public int nValue { get; private set; }
 
         public NGramPredictor(int nVal = 3)
         {
-            Data = new Dictionary<List<RPSMove>, KeyDataRecord>();
+            Data = new Dictionary<string, KeyDataRecord>();
             nValue = nVal;
         }
 
         public void RegisterSequence(List<RPSMove> sequences)
         {
             List<RPSMove> key = sequences.GetRange(0, nValue);
-            RPSMove value = sequences[nValue - 1];
+            string keyString = ListToString(key);
+			RPSMove value = sequences[nValue];
 
-            KeyDataRecord keyData;
+			KeyDataRecord keyData;
 
-            if (!Data.ContainsKey(key))
+            if (!Data.ContainsKey(keyString))
             {
-                keyData = Data[key] = new KeyDataRecord();
+                keyData = Data[keyString] = new KeyDataRecord();
                 keyData.Counts[value] = 0;
-            } 
+            }
+            else if (!Data[keyString].Counts.ContainsKey(value))
+            {
+                keyData = Data[keyString];
+                keyData.Counts[value] = 0;
+            }
             else
             {
-                keyData = Data[key];
+                keyData = Data[keyString];
             }
 
             keyData.Counts[value]++;
@@ -41,7 +47,8 @@ namespace NGram
         public RPSMove GetBestMove(List<RPSMove> sequences)
         {
             List<RPSMove> key = sequences.GetRange(0, nValue);
-            KeyDataRecord keyData = Data[key];
+			string keyString = ListToString(key);
+			KeyDataRecord keyData = Data[keyString];
 
             int highestValue = 0;
             RPSMove bestMove = RPSMove.Scissors;
@@ -58,6 +65,20 @@ namespace NGram
             }
 
             return bestMove;
+        }
+
+        private string ListToString(List<RPSMove> moves) 
+        {
+            string result = "";
+            
+            foreach (RPSMove move in moves)
+            {
+                if (move == RPSMove.Rock) result += "r";
+                else if (move == RPSMove.Paper) result += "p";
+                else result += "s";
+            }
+
+            return result;
         }
     }
 }

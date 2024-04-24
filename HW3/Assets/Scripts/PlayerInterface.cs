@@ -48,7 +48,7 @@ public class PlayerInterface : MonoBehaviour
                 else return;
 
                 moves.Insert(0, RockPaperScissors.CharToMove(input));
-                if (moves.Count >= nGram.nValue)
+                if (moves.Count > nGram.nValue)
                 {
                     nGram.RegisterSequence(moves);
                 }
@@ -57,7 +57,7 @@ public class PlayerInterface : MonoBehaviour
                 // You will need to implement this code and any history tracking it requires.
                 // For now, we will predict a move at random.
                 RPSMove predMove;
-                if (moves.Count < nGram.nValue)
+                if (moves.Count <= nGram.nValue)
                 {
                     char predicted = RockPaperScissors.RandomMove();
                     predMove = RockPaperScissors.CharToMove(predicted);
